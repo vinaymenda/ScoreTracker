@@ -1,0 +1,15 @@
+﻿@model ScoreTracker.Models.Inning;
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+
+    <form asp-controller="Home" asp-action="Inning" method="post">
+        Number of players: <input type="number" min="1" max="11" asp-for="Players" />
+        Number of overs: <input type="number" min="1" asp-for="TotalOvers" />
+        <button type="submit">Begin!</button>
+    </form>
+</div>

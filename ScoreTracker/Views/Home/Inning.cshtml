@@ -1,0 +1,163 @@
+﻿@model ScoreTracker.Models.Inning;
+
+@{
+    ViewData["Title"] = "Inning";
+}
+
+<script>
+
+    class Outcome {
+        key;
+        name;
+        runs;
+        incrementOvers;
+        incrementWickets;
+
+        constructor(key, name, runs, incrementOvers, incrementWickets) {
+            this.key = key;
+            this.runs = runs;
+            this.incrementOvers = incrementOvers;
+            this.incrementWickets = incrementWickets;
+            this.name = name;
+        }
+    }
+
+    var outcomesList = [];
+    outcomesList.push(new Outcome(1, '0', 0, true, false));
+    outcomesList.push(new Outcome(2, '1', 1, true, false));
+    outcomesList.push(new Outcome(3, '2', 2, true, false));
+    outcomesList.push(new Outcome(4, '3', 3, true, false));
+    outcomesList.push(new Outcome(5, '4', 4, true, false));
+    outcomesList.push(new Outcome(6, '6', 6, true, false));
+
+    outcomesList.push(new Outcome(7, 'Wicket', 0, true, true));
+
+    outcomesList.push(new Outcome(8, 'nb', 1, false, false));
+    outcomesList.push(new Outcome(9, 'nb+1', 2, false, false));
+    outcomesList.push(new Outcome(10, 'nb+2', 3, false, false));
+    outcomesList.push(new Outcome(11, 'nb+3', 4, false, false));
+    outcomesList.push(new Outcome(12, 'nb+4', 5, false, false));
+    outcomesList.push(new Outcome(13, 'nb+6', 7, false, false));
+
+    outcomesList.push(new Outcome(14, 'wd', 1, false, false));
+    outcomesList.push(new Outcome(15, 'wd+1', 2, false, false));
+    outcomesList.push(new Outcome(16, 'wd+2', 3, false, false));
+    outcomesList.push(new Outcome(17, 'wd+3', 4, false, false));
+    outcomesList.push(new Outcome(18, 'wd+4', 5, false, false));
+
+    class Scorecard {
+        runs;
+        wickets;
+        overs;
+        bowls;
+
+        constructor(runs = 0, wickets = 0, overs = 0, bowls = 0) {
+            this.runs = runs;
+            this.wickets = wickets;
+            this.overs = overs;
+            this.bowls = bowls;
+        }
+    }
+
+    class Inning {        
+        #scoreCard;
+        #outcomes;
+
+        constructor() {
+            this.#scoreCard = new Scorecard();
+            this.#outcomes = [];
+        }
+
+        #refreshScoreBoard() {
+            $('#runs').text(this.#scoreCard.runs);
+            $('#wickets').text(this.#scoreCard.wickets);
+            $('#overs').text(this.#scoreCard.overs + '.' + this.#scoreCard.bowls);
+        }
+
+        newOutcome(outcomeKey) {
+            var outcome = outcomesList.find(o => o.key == outcomeKey);
+            this.#outcomes.push(outcome);
+
+            var runs = this.#scoreCard.runs;
+            var wickets = this.#scoreCard.wickets;
+            var overs = this.#scoreCard.overs;
+            var bowls = this.#scoreCard.bowls;
+
+            runs += outcome.runs;
+            if (outcome.incrementOvers) {
+                bowls += 1;
+                if (bowls == 6) {
+                    bowls = 0;
+                    overs += 1;
+                }
+            }
+            if (outcome.incrementWickets) {
+                wickets += 1;
+            }
+
+            this.#scoreCard = new Scorecard(runs, wickets, overs, bowls);
+            this.#refreshScoreBoard();
+        }
+
+        undoLastOutcome() {
+            var outcome = this.#outcomes.pop(outcome);
+            if (!outcome) { return; }
+
+            var runs = this.#scoreCard.runs;
+            var wickets = this.#scoreCard.wickets;
+            var overs = this.#scoreCard.overs;
+            var bowls = this.#scoreCard.bowls;
+
+            runs -= outcome.runs;
+            if (outcome.incrementOvers) {
+                bowls -= 1;
+                if (bowls == -1) {
+                    bowls = 5;
+                    overs -= 1;
+                }
+            }
+            if (outcome.incrementWickets) {
+                wickets -= 1;
+            }
+
+            this.#scoreCard = new Scorecard(runs, wickets, overs, bowls);
+            this.#refreshScoreBoard();
+        }
+    }     
+
+    var inning = new Inning();
+    
+</script>
+
+
+<div class="text-center">
+    <h1 class="display-3" style="display:inline">Score: <span id="runs" asp-for="Runs">@Model.Runs</span>/<span id="wickets" asp-for="Wickets">@Model.Wickets</span> </h1> <a href="#" onclick="inning.undoLastOutcome()"><i class="fa fa-undo fa-2x" aria-hidden="true"></i></a>
+    <h1 class="display-3">Overs: <span id="overs" asp-for="Overs">@Model.Overs.0</span> </h1>
+    <hr />
+    <div>
+        <button class="btn info" onclick="inning.newOutcome(1)">0</button>
+        <button class="btn info" onclick="inning.newOutcome(2)">1</button>
+        <button class="btn info" onclick="inning.newOutcome(3)">2</button>
+        <button class="btn info" onclick="inning.newOutcome(4)">3</button>
+        <button class="btn info" onclick="inning.newOutcome(5)">4</button>
+        <button class="btn info" onclick="inning.newOutcome(6)">6</button>
+        <br />
+        <button class="btn danger" onclick="inning.newOutcome(7)">Wicket</button>
+        <br />
+        <button class="btn info" onclick="inning.newOutcome(8)">nb</button>
+        <button class="btn info" onclick="inning.newOutcome(9)">nb+1</button>
+        <button class="btn info" onclick="inning.newOutcome(10)">nb+2</button>
+        <button class="btn info" onclick="inning.newOutcome(11)">nb+3</button>
+        <button class="btn info" onclick="inning.newOutcome(12)">nb+4</button>
+        <button class="btn info" onclick="inning.newOutcome(13)">nb+6</button>
+        <br />
+        <button class="btn info" onclick="inning.newOutcome(14)">wd</button>
+        <button class="btn info" onclick="inning.newOutcome(15)">wd+1</button>
+        <button class="btn info" onclick="inning.newOutcome(16)">wd+2</button>
+        <button class="btn info" onclick="inning.newOutcome(17)">wd+3</button>
+        <button class="btn info" onclick="inning.newOutcome(18)">wd+4</button>
+        <br />
+    </div>
+
+</div>
+
